@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quản lý nhà hàng</title>
+    <style>
+      .alert {
+        background: linear-gradient(90deg, #ffd600 0%, #fffde7 100%);
+        color: #333;
+        padding: 16px 24px;
+        border-radius: 10px;
+        font-size: 17px;
+        font-weight: 500;
+        margin-bottom: 28px;
+        box-shadow: 0 2px 8px rgba(255, 214, 0, 0.07);
+        border-left: 6px solid #ffd600;
+      }
+      .row-2 {
+        display: flex;
+        gap: 32px;
+        margin-bottom: 36px;
+      }
+      .chart-card,
+      .table-card {
+        flex: 1;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(21, 101, 192, 0.07);
+        padding: 24px 18px;
+        text-align: center;
+        border: 1px solid #e3e6ef;
+      }
+      .chart-title,
+      .table-title {
+        font-size: 16px;
+        color: #1976d2;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      .chart-legend {
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        margin-top: 10px;
+        font-size: 14px;
+      }
+      .chart-legend .dot {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+      .active-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 15px;
+      }
+      .active-table th,
+      .active-table td {
+        padding: 8px 6px;
+        border-bottom: 1px solid #e3e6ef;
+        text-align: center;
+      }
+      .active-table th {
+        background: #f4f6fb;
+        color: #1976d2;
+        font-weight: 600;
+      }
+      .active-table tr:hover td {
+        background: #e3f2fd;
+      }
+      .status {
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+        color: #fff;
+        font-weight: 500;
+      }
+      .status.busy {
+        background: #1976d2;
+      }
+      .status.reserved {
+        background: #ffd600;
+        color: #333;
+      }
+      @media (max-width: 1100px) {
+        .row-2 {
+          flex-direction: column;
+          gap: 18px;
+        }
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f4f6fb;
+        color: #222;
+      }
+      .header {
+        background: linear-gradient(90deg, #1565c0 0%, #1976d2 100%);
+        color: #fff;
+        padding: 24px 40px 20px 260px;
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 12px rgba(21, 101, 192, 0.08);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .profile-bar {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .profile-bar .search {
+        padding: 7px 16px;
+        border-radius: 20px;
+        border: none;
+        font-size: 15px;
+        outline: none;
+        margin-right: 10px;
+      }
+      .profile-bar .notify {
+        font-size: 22px;
+        cursor: pointer;
+        margin-right: 10px;
+        transition: color 0.2s;
+      }
+      .profile-bar .notify:hover {
+        color: #ffd600;
+      }
+      .profile-bar .user {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #e3f2fd;
+        padding: 5px 14px 5px 7px;
+        border-radius: 20px;
+      }
+      .profile-bar .user img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+      }
+      .profile-bar .username {
+        font-weight: bold;
+        color: #1976d2;
+      }
+      .profile-bar .role {
+        font-size: 12px;
+        color: #888;
+        margin-left: 4px;
+      }
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 240px;
+        background: #fff;
+        border-right: 1px solid #e3e6ef;
+        box-shadow: 2px 0 8px rgba(21, 101, 192, 0.03);
+        z-index: 10;
+        padding-top: 32px;
+      }
+      .sidebar .logo {
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+        color: #1976d2;
+        margin-bottom: 36px;
+        letter-spacing: 2px;
+      }
+      .sidebar ul {
+        list-style: none;
+        padding: 0 0 0 0;
+        margin: 0;
+      }
+      .sidebar li {
+        margin-bottom: 8px;
+      }
+      .sidebar a {
+        display: flex;
+        align-items: center;
+        padding: 14px 32px;
+        color: #1976d2;
+        text-decoration: none;
+        border-radius: 8px 0 0 8px;
+        font-size: 17px;
+        font-weight: 500;
+        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        gap: 12px;
+      }
+      .sidebar a.active,
+      .sidebar a:hover {
+        background: #e3f2fd;
+        color: #0d47a1;
+        box-shadow: 2px 2px 8px #e3f2fd;
+      }
+      .container {
+        margin-left: 240px;
+        padding: 36px 48px 36px 48px;
+        min-height: calc(100vh - 80px);
+      }
+      .dashboard-cards {
+        display: flex;
+        gap: 32px;
+        margin-bottom: 36px;
+      }
+      .card {
+        flex: 1;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(21, 101, 192, 0.07);
+        padding: 32px 24px;
+        text-align: center;
+        border: 1px solid #e3e6ef;
+        transition: box-shadow 0.2s, transform 0.2s;
+      }
+      .card:hover {
+        box-shadow: 0 12px 32px rgba(21, 101, 192, 0.18);
+        transform: translateY(-4px) scale(1.03);
+      }
+      .card-title {
+        font-size: 17px;
+        color: #888;
+        margin-bottom: 10px;
+        font-weight: 500;
+      }
+      .card-value {
+        font-size: 38px;
+        color: #1976d2;
+        font-weight: bold;
+        margin-bottom: 6px;
+      }
+      .card-desc {
+        font-size: 13px;
+        color: #aaa;
+      }
+      .welcome {
+        font-size: 22px;
+        margin-bottom: 22px;
+        color: #222;
+        font-weight: 600;
+      }
+      .quick-actions {
+        margin-top: 30px;
+      }
+      .quick-actions button {
+        background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+        color: #fff;
+        border: none;
+        padding: 14px 36px;
+        border-radius: 8px;
+        font-size: 17px;
+        margin-right: 18px;
+        font-weight: 500;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(21, 101, 192, 0.08);
+        transition: background 0.2s, box-shadow 0.2s;
+      }
+      .quick-actions button:hover {
+        background: linear-gradient(90deg, #1565c0 0%, #1976d2 100%);
+        box-shadow: 0 4px 16px rgba(21, 101, 192, 0.13);
+      }
+      .recent-activity {
+        margin-top: 40px;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 12px rgba(21, 101, 192, 0.06);
+        padding: 24px 18px;
+      }
+      .recent-activity h3 {
+        margin: 0 0 18px 0;
+        color: #1976d2;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      .recent-activity table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 15px;
+      }
+      .recent-activity th,
+      .recent-activity td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #e3e6ef;
+        text-align: left;
+      }
+      .recent-activity th {
+        background: #f4f6fb;
+        color: #1976d2;
+        font-weight: 600;
+      }
+      .recent-activity tr:last-child td {
+        border-bottom: none;
+      }
+      @media (max-width: 1100px) {
+        .dashboard-cards {
+          flex-direction: column;
+          gap: 18px;
+        }
+        .container {
+          padding: 24px 8px 24px 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="sidebar">
+      <div class="logo">NHÀ HÀNG VIP</div>
+      <ul>
+        <li><a href="#" class="active">🏠 Tổng quan</a></li>
+        <li><a href="#">🍽️ Quản lý bàn</a></li>
+        <li><a href="#">🥗 Quản lý món ăn</a></li>
+        <li><a href="#">📝 Đặt món</a></li>
+        <li><a href="#">💵 Hóa đơn</a></li>
+        <li><a href="#">👨‍🍳 Nhân viên</a></li>
+        <li><a href="#">👥 Khách hàng</a></li>
+        <li><a href="#">📊 Báo cáo</a></li>
+        <li><a href="#">🚪 Đăng xuất</a></li>
+      </ul>
+    </nav>
+    <div class="header">
+      <span>Quản lý nhà hàng - Trang chủ</span>
+      <div class="profile-bar">
+        <input class="search" type="text" placeholder="Tìm kiếm nhanh..." />
+        <span class="notify">🔔</span>
+        <span class="user">
+          <img
+            src="https://randomuser.me/api/portraits/men/32.jpg"
+            alt="avatar"
+          />
+          <span class="username">Admin</span>
+          <span class="role">Quản trị viên</span>
+        </span>
+      </div>
+    </div>
+    <div class="container">
+      <div class="welcome">Xin chào, Quản trị viên!</div>
+      <div class="dashboard-cards">
+        <div class="card">
+          <div class="card-title">Số bàn đang hoạt động</div>
+          <div class="card-value">12</div>
+          <div class="card-desc">Bàn có khách/người đặt</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Đơn hàng hôm nay</div>
+          <div class="card-value">34</div>
+          <div class="card-desc">Tổng số đơn đã tạo</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Doanh thu hôm nay</div>
+          <div class="card-value">5.200.000₫</div>
+          <div class="card-desc">Tính đến hiện tại</div>
+        </div>
+      </div>
+      <div class="alert">
+        🎉 Hôm nay nhà hàng đã đạt 5 triệu doanh thu! Tiếp tục phát huy nhé!
+      </div>
+
+      <div class="row-2">
+        <div class="chart-card">
+          <div class="chart-title">Tỉ lệ doanh thu theo loại món</div>
+          <svg width="160" height="160" viewBox="0 0 32 32">
+            <circle r="16" cx="16" cy="16" fill="#e3f2fd" />
+            <circle
+              r="16"
+              cx="16"
+              cy="16"
+              fill="transparent"
+              stroke="#1976d2"
+              stroke-width="8"
+              stroke-dasharray="50 50"
+              stroke-dashoffset="0"
+            />
+            <circle
+              r="16"
+              cx="16"
+              cy="16"
+              fill="transparent"
+              stroke="#42a5f5"
+              stroke-width="8"
+              stroke-dasharray="30 70"
+              stroke-dashoffset="-50"
+            />
+            <circle
+              r="16"
+              cx="16"
+              cy="16"
+              fill="transparent"
+              stroke="#ffd600"
+              stroke-width="8"
+              stroke-dasharray="20 80"
+              stroke-dashoffset="-80"
+            />
+            <text
+              x="16"
+              y="18"
+              text-anchor="middle"
+              font-size="7"
+              fill="#1976d2"
+              font-weight="bold"
+            >
+              100%
+            </text>
+          </svg>
+          <div class="chart-legend">
+            <span
+              ><span class="dot" style="background: #1976d2"></span>Món
+              chính</span
+            >
+            <span
+              ><span class="dot" style="background: #42a5f5"></span>Món
+              phụ</span
+            >
+            <span
+              ><span class="dot" style="background: #ffd600"></span>Đồ
+              uống</span
+            >
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-title">Bàn đang hoạt động</div>
+          <table class="active-table">
+            <tr>
+              <th>Bàn</th>
+              <th>Khách</th>
+              <th>Trạng thái</th>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>4</td>
+              <td><span class="status busy">Đang phục vụ</span></td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>2</td>
+              <td><span class="status busy">Đang phục vụ</span></td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>4</td>
+              <td><span class="status reserved">Đã đặt trước</span></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="quick-actions">
+        <button>+ Thêm món mới</button>
+        <button>+ Thêm bàn mới</button>
+        <button>+ Tạo hóa đơn</button>
+      </div>
+      <div class="recent-activity">
+        <h3>Hoạt động gần đây</h3>
+        <table>
+          <tr>
+            <th>Thời gian</th>
+            <th>Người thực hiện</th>
+            <th>Hành động</th>
+            <th>Chi tiết</th>
+          </tr>
+          <tr>
+            <td>09:12</td>
+            <td>Nguyễn Văn A</td>
+            <td>Thêm món mới</td>
+            <td>Bò lúc lắc</td>
+          </tr>
+          <tr>
+            <td>09:05</td>
+            <td>Trần Thị B</td>
+            <td>Tạo hóa đơn</td>
+            <td>Bàn 5 - 450.000₫</td>
+          </tr>
+          <tr>
+            <td>08:55</td>
+            <td>Lê Văn C</td>
+            <td>Đặt bàn</td>
+            <td>Bàn 8 - 4 người</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>
